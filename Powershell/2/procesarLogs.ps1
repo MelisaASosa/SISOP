@@ -42,25 +42,17 @@ function mostrarResultadosDiarios {
     Write-Host "-------------  " $dia.ToShortDateString() "  --------------"
     Write-Host "El promedio de tiempo de las llamadas es: $promedio `n"
 
-    $resultadosDiariosCantidad = @{}
-    $resultadosDiariosPromedio = @{}
-
     foreach ($cantidadUsuario in $cantidadLlamadasPorUsuarioPorDia.GetEnumerator()) {
         $usuario = $cantidadUsuario.Name
+        
         $cantidad = $cantidadUsuario.Value
         $acumulado = @($acumuladoTiempoPorUsuarioPorDia.GetEnumerator() | Where-Object {$_.Name -eq $usuario}).Value
-
+        
         $promedioUsuario = [timespan]::fromseconds($acumulado / $cantidad)
 
-        $resultadosDiariosCantidad.$usuario = $cantidad
-        $resultadosDiariosPromedio.$usuario = $promedioUsuario
+        Write-Host "La cantidad de llamadas de $usuario en el día es de: $cantidad"
+		Write-Host "El promedio de tiempo de las llamadas de $usuario en el día es de: $promedioUsuario `n"
     }
-
-    Write-Host "Cantidad de llamadas por usuario en el día"
-    $resultadosDiariosCantidad | Format-List
-
-    Write-Host "Promedio de tiempo de las llamadas en el día por usuario"
-    $resultadosDiariosPromedio | Format-List
 
     $cantidadLlamadasMenorPromedio = 0
 
@@ -132,6 +124,9 @@ foreach($logFile in Get-ChildItem $directorio) {
 
     $infoLog = Import-Csv -Path $logFile -Header 'Fecha', 'Hora', 'Guion', 'Usuario' -Delimiter " "
     $infoLog =  $infoLog | Select-Object -Property Fecha, Hora, Usuario | Sort-Object Fecha, Hora
+
+    Write-Host "***LLAMADAS A PROCESAR***"
+    $infoLog | Format-List
 
     $diaEnProceso = [DateTime]$infoLog[0].Fecha
 
